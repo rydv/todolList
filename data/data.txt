@@ -10,7 +10,8 @@ test_values = [
     "PART NO. J94-&#x1c;6543",
     "SECTION NO. K106-&#x1d;2310",
     "TYPE NO. L119-&#x1e;5647",
-    "ID NO. M128-&#x1f;7980"
+    "ID NO. M128-&#x1f;7980",
+    "EXAMPLE ^M TEXT",  # Control-M
+    "TEXT WITH UNICODE LINE SEPARATOR\u2028",  # Unicode line separator
+    "TEXT WITH PARAGRAPH SEPARATOR\u2029"  # Unicode paragraph separator
 ]
-
-r'[\r\n\x0b\x0c\x1c\x1d\x1e\x1f\x85\u2028\u2029\x96]+'
