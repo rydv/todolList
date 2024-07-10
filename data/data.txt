@@ -1,0 +1,16 @@
+test_values = [
+    "LOT NO. B15-&#xd;1234",
+    "ITEM NO. C9-&#xd;5678",
+    "ORDER NO. D30-&#xa;7890",
+    "BATCH NO. E47-&#xa;3456",
+    "SERIAL NO. F52-&#xb;9012",
+    "CODE NO. G63-&#xb;7896",
+    "GROUP NO. H72-&#xc;4567",
+    "PRODUCT NO. I85-&#xc;1239",
+    "PART NO. J94-&#x1c;6543",
+    "SECTION NO. K106-&#x1d;2310",
+    "TYPE NO. L119-&#x1e;5647",
+    "ID NO. M128-&#x1f;7980"
+]
+
+r'[\r\n\x0b\x0c\x1c\x1d\x1e\x1f\x85\u2028\u2029\x96]+'
