@@ -1,69 +1,68 @@
-Rule Sheet Structure Documentation
-This document outlines the structure and requirements for the CSV file containing the list of rules to be processed by the application. The rule sheet must follow the specified format to ensure accurate processing and validation of rules.
+Rule Processing Logic
+Overview
+The rule processing logic involves interpreting structured expressions provided in the reference fields of each rule. These expressions dictate conditions that transactions must satisfy for the rule to be considered valid. Each expression is parsed using specific identifiers and values to form criteria for matching transactions.
 
-CSV File Structure
-The CSV file should contain the following columns:
+Identifiers and Definitions Examples
+|EXACT|<exact value>
 
-Rule Id: Unique identifier for the rule.
-Rule Type: The type of the rule (e.g., "exact", "expression", "operation").
-Country: The country code associated with the rule.
-Local Acc No: Local account number associated with the rule (use "ALL" for all accounts).
-Amount: Amount condition (use "same" for the same amount).
-Value Date: Value date condition (use "No" if not applicable).
-L/S: Debit or credit indicator (e.g., "L" for debit, "S" for credit).
-D/C: Debit or credit code (e.g., "A" for credit, "D" for debit).
-Ref 1: Reference field 1 containing exact values and expressions.
-Ref 2: Reference field 2 containing exact values and expressions.
-Ref 3: Reference field 3 containing exact values and expressions.
-Ref 4: Reference field 4 containing exact values and expressions.
-Example CSV Structure
-plaintext
+Description: Specifies an exact string that must be present in the transaction data.
+Example: |EXACT|FX
+Explanation: This rule matches transactions containing the exact string "FX".
+|EXP|<expression>
+
+Description: Defines a regular expression pattern that the transaction data must match.
+Example: |EXP|\d{9}
+Explanation: This rule matches transactions where a sequence of nine digits (\d{9}) is found.
+|EXP|(...)
+
+Description: Encloses an expression within parentheses, indicating that the matched value from this expression will be compared with a similar matched value from another filter.
+Example: |EXP|(\d{9})
+Explanation: This rule captures the matched value from the expression (\d{9}), which will be compared with a similar matched value from another filter.
+|DT_FRMT|<date format>
+
+Description: Indicates that the preceding expression represents a date formatted according to the specified format.
+Example: |DT_FRMT|YYYY-MM-DD
+Explanation: This rule expects the preceding expression to be a date formatted as YYYY-MM-DD.
+|OP|<operation details>
+
+Description: Specifies an operation to perform on the matched value retrieved from the transaction data. In this case, it defines a replace operation that replaces specified characters with an empty string in the matched value.
+Example: |OP|REP|:||
+Explanation: This rule performs a replace operation on the matched value, replacing ':' with an empty string.
+
+
+Examples
+Example-1:
+FILTER-1
+
+css
 Copy code
-Rule Id,Rule Type,Country,Local Acc No,Amount,Value date,L/S,D/C,Ref 1,Ref 2,Ref 3,Ref 4
-RULE001,exact,UK,ALL,same,No,L,A,|EXACT|Service Charge Reversal,,,
-RULE001,exact,UK,ALL,same,No,L,A,|EXACT|invoice 8001,,,
-RULE002,exact,Canada,ALL,same,No,S,A,,,Account Transfer,
-RULE002,exact,Canada,ALL,same,No,S,A,,,,RBC 7890123
-RULE003,expression,USA,ALL,same,No,L,A,,,,|EXP|8\d{5}
-RULE004,operation,UK,ALL,same,No,L,A,|EXACT|ATM WDR AT 2164 MDS |EXP|(\d{2}:\d{2}:\d{2})|OP|REP-:-,|EXP|(\d{6}),,
-Field Definitions
-Rule Id: A unique identifier for each rule. This is a mandatory field.
-Rule Type: Specifies the type of rule. Possible values are "exact", "expression", and "operation".
-exact: Matches exact text values.
-expression: Matches based on regular expressions.
-operation: Involves operations on matched values (e.g., replacing characters).
-Country: The country code for the rule. Use standard country codes (e.g., "UK" for the United Kingdom).
-Local Acc No: The local account number. Use "ALL" to apply to all accounts.
-Amount: Condition for the amount. Use "same" if the amount should be the same.
-Value Date: Condition for the value date. Use "No" if not applicable.
-L/S: Indicates whether the transaction is a debit or credit. Use "L" for debit and "S" for credit.
-D/C: Indicates the debit or credit code. Use "A" for credit and "D" for debit.
-Ref 1, Ref 2, Ref 3, Ref 4: Reference fields containing the exact values and expressions to match. These fields can contain exact text, regular expressions, or operations as defined below.
-Reference Field Syntax
-Exact Value:
-Syntax: |EXACT|<value>
-Example: |EXACT|Service Charge Reversal
-Regular Expression:
-Syntax: |EXP|<regex>
-Example: |EXP|8\d{5}
-Operation:
-Syntax: |EXACT|<value>|EXP|<regex>|OP|<operation>-<old>-<new>
-Example: |EXACT|ATM WDR AT 2164 MDS |EXP|(\d{2}:\d{2}:\d{2})|OP|REP-:-
-Operations
-Operations are used to manipulate the extracted values from regular expressions. Currently, the following operation is supported:
+value: |EXACT|FX|EXP|\d{9}
+FILTER-2
 
-REP: Replace a character or string with another string.
-Syntax: |OP|REP-<old>-<new>
-Example: |OP|REP-:-
-Processing Logic
-The application processes each rule based on its type and the values provided in the reference fields. The exact value rules match exact text values, expression rules match based on regular expressions, and operation rules perform operations on matched values to validate the conditions.
+css
+Copy code
+value: |EXACT|MX|EXP|\d{9}
+Note: Expression value is not wrapped in (), indicating matched values will not be compared with those from FILTER-2.
 
-Example Usage
-Given the rule RULE004:
+Valid Matches
 
-Ref 1: |EXACT|ATM WDR AT 2164 MDS |EXP|(\d{2}:\d{2}:\d{2})|OP|REP-:-
-Ref 2: |EXP|(\d{6})
-Ref 1 matches transactions with text ATM WDR AT 2164 MDS followed by a time in HH:MM:SS format.
-The operation REP-:- replaces colons : in the time with an empty string.
-Ref 2 then matches the transformed time format HHMMSS.
-Transactions satisfying these conditions are considered valid matches for RULE004.
+FILTER-1 MATCHES: FX345674674
+FILTER-2 MATCHES: MX445674645
+Example-2:
+FILTER-1
+
+css
+Copy code
+value: |EXACT|FX|EXP|(\d{9})
+FILTER-2
+
+css
+Copy code
+value: |EXACT|MX|EXP|(\d{9})
+Note: Expression value is wrapped in (), indicating matched values WILL be compared with those from FILTER-2.
+
+Valid Matches
+
+FILTER-1 MATCHES: FX345674674
+FILTER-2 MATCHES: MX345674674
+This documentation outlines how rules are structured using identifiers and examples to illustrate their application. It guides the process of interpreting and matching rules based on these structured expressions.
