@@ -1,112 +1,110 @@
-Example Usage for Each Identifier
-1. |EXACT|<exact value>
-Rule: RULE001
-Filter 1 Value: |EXACT|FX
-Filter 2 Value: |EXACT|MX
-Explanation:
+Here’s a detailed task breakdown for the project, including both the backend rule processing and the frontend UI development with proper authorization. This will help in seeking internal funding and planning the development process effectively.
 
-Filter 1 matches any transaction containing the exact string "FX".
-Filter 2 matches any transaction containing the exact string "MX".
-Example Transaction:
+Backend Rule Processing
+Initial Setup and Configuration
 
-Filter 1 Match: FX123456789
-Filter 2 Match: MX987654321
-These transactions are considered valid matches for RULE001 if both exact values are present.
+Set up the project repository.
+Configure the development environment.
+Set up database schemas and necessary tables.
+Rule Parsing and Validation Module
 
-2. |EXP|<expression>
-Rule: RULE002
-Filter 1 Value: |EXP|\d{9}
-Filter 2 Value: |EXP|\d{9}
-Explanation:
+Parse CSV rule sheet.
+Validate fields and values.
+Handle invalid rules and log errors.
+Rule Application and Matching Logic
 
-Filter 1 matches any transaction containing a sequence of 9 digits.
-Filter 2 matches any transaction containing a sequence of 9 digits.
-Example Transaction:
+Develop rule identification logic.
+Implement search expression generation.
+Apply filters and matching logic.
+Extract and compare values.
+Implement operations (e.g., replace action).
+Data Aggregation and Processing
 
-Filter 1 Match: Transaction with 123456789
-Filter 2 Match: Transaction with 987654321
-These transactions are considered valid matches for RULE002 if both expressions match a sequence of 9 digits.
+Aggregate transaction data based on RELATIONSHIP_ID.
+Perform necessary calculations and summarizations.
+Develop logic to handle value date rules and operations.
+Integration with Elasticsearch
 
-3. |EXP|(<expression>)
-Rule: RULE003
-Filter 1 Value: |EXP|(\d{9})
-Filter 2 Value: |EXP|(\d{9})
-Explanation:
+Set up Elasticsearch instances.
+Develop logic for creating and executing Elasticsearch queries.
+Handle scroll context and pagination for large data sets.
+Fetch matches and handle responses.
+Result Output and Reporting
 
-Filter 1 captures the matched value from the expression (a sequence of 9 digits).
-Filter 2 captures the matched value from the expression (a sequence of 9 digits).
-The captured values from Filter 1 and Filter 2 are compared.
-Example Transaction:
+Format the processed transaction data.
+Develop logic to generate and return the result summary.
+Create report generation functionality.
+Frontend UI Development with Authorization
+Initial Setup and Configuration
 
-Filter 1 Match: Transaction with 123456789
-Filter 2 Match: Transaction with 123456789
-These transactions are considered valid matches for RULE003 if the captured values from both filters are identical.
+Set up the project repository.
+Configure the development environment.
+Install and configure necessary libraries and frameworks (e.g., React, Redux).
+Authentication and Authorization
 
-4. |DT_FRMT|<date format>
-Rule: RULE004
-Filter 1 Value: |EXP|(\d{8})|DT_FRMT|DDMMYYYY
-Filter 2 Value: |EXP|(\d{4}-\d{2}-\d{2})
-Explanation:
+Implement AD group integration.
+Develop user login and authentication flows.
+Implement role-based access control.
+Test and verify access permissions.
+File Upload and Instance Selection
 
-Filter 1 captures a date in the format DDMMYYYY.
-Filter 2 captures a date in the format YYYY-MM-DD.
-The captured dates are compared after conversion to a common format.
-Example Transaction:
+Develop UI for file upload functionality.
+Implement instance selection dropdown or form.
+Validate and handle file upload errors.
+Process Tracking and Status Monitoring
 
-Filter 1 Match: Transaction date 25122018
-Filter 2 Match: Transaction date 2018-12-25
-These transactions are considered valid matches for RULE004 if the captured dates are equivalent after format conversion.
+Develop UI to track the status of the uploaded file.
+Implement backend endpoints to fetch processing status.
+Display real-time updates on the status of the file processing.
+Run Summary and Rule Statistics
 
-5. |OP|<operation details>
-Rule: RULE005
-Filter 1 Value: |EXACT|ATM WDR AT 2164 MDS |EXP|(\d{2}:\d{2}:\d{2})|OP|REP|:||
-Filter 2 Value: |EXP|(\d{6})
-Explanation:
+Develop UI to display run summary post-processing.
+Implement backend endpoints to fetch rule statistics.
+Display matched rules and statistics.
+Report Download Functionality
 
-Filter 1 matches transactions with text ATM WDR AT 2164 MDS followed by a time in HH:MM
-format.
-The operation REP|:|| replaces colons : in the time with an empty string.
-Filter 2 matches the transformed time format HHMMSS.
-Example Transaction:
+Implement backend logic to generate downloadable reports.
+Develop UI for users to download processed data reports.
+Ensure proper error handling and user feedback.
+Testing and Deployment
+Backend Testing
 
-Filter 1 Match: ATM WDR AT 2164 MDS 13:46:43
-Filter 2 Match: 134643
-These transactions are considered valid matches for RULE005 if the transformed time from Filter 1 matches the value in Filter 2.
+Unit tests for rule parsing and validation logic.
+Integration tests for Elasticsearch queries and result handling.
+Performance testing for large data sets.
+Frontend Testing
 
-Example Usage for Each Rule
-RULE001
-Filter 1 Value: |EXACT|FX
-Filter 2 Value: |EXACT|MX
-Valid Transactions:
+Unit tests for UI components.
+Integration tests for authentication and file upload.
+End-to-end tests for the entire user workflow.
+Deployment and Monitoring
 
-Filter 1 Match: FX123456789
-Filter 2 Match: MX987654321
-RULE002
-Filter 1 Value: |EXP|\d{9}
-Filter 2 Value: |EXP|\d{9}
-Valid Transactions:
+Set up CI/CD pipelines.
+Deploy the application to staging and production environments.
+Implement monitoring and logging for the backend and frontend.
+Set up alerts for any critical failures or performance issues.
+Project Management and Coordination
+Task Assignment and Tracking
 
-Filter 1 Match: Transaction with 123456789
-Filter 2 Match: Transaction with 987654321
-RULE003
-Filter 1 Value: |EXP|(\d{9})
-Filter 2 Value: |EXP|(\d{9})
-Valid Transactions:
+Assign tasks to respective team members.
+Use project management tools (e.g., Jira, Trello) to track progress.
+Regular Meetings and Updates
 
-Filter 1 Match: Transaction with 123456789
-Filter 2 Match: Transaction with 123456789
-RULE004
-Filter 1 Value: |EXP|(\d{8})|DT_FRMT|DDMMYYYY
-Filter 2 Value: |EXP|(\d{4}-\d{2}-\d{2})
-Valid Transactions:
+Schedule regular stand-up meetings to discuss progress.
+Provide updates on task completion and any blockers.
+Documentation and User Guides
 
-Filter 1 Match: Transaction date 25122018
-Filter 2 Match: Transaction date 2018-12-25
-RULE005
-Filter 1 Value: |EXACT|ATM WDR AT 2164 MDS |EXP|(\d{2}:\d{2}:\d{2})|OP|REP|:||
-Filter 2 Value: |EXP|(\d{6})
-Valid Transactions:
+Create detailed documentation for the backend and frontend logic.
+Develop user guides for the UI and report generation features.
+Feedback and Iteration
 
-Filter 1 Match: ATM WDR AT 2164 MDS 13:46:43
-Filter 2 Match: 134643
-These detailed examples help illustrate the structure and processing logic for each rule based on the identifiers and their values.
+Collect feedback from users and stakeholders.
+Iterate on the features based on feedback and improve the application.
+Summary
+This detailed task breakdown should help in planning and seeking internal funding for the project. Each task can be further broken down into smaller subtasks as needed, and assigned to developers based on their expertise and workload. Regular updates and feedback loops will ensure that the project stays on track and meets user requirements effectively.
+
+
+
+
+
+
