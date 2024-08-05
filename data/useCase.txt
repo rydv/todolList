@@ -1,0 +1,29 @@
+Case-1: Python (Pandas) Use Case
+Task: Data Analysis with Pandas
+
+Description:
+
+You have a CSV file named sales_data.csv with the following columns: Date, Product, Sales, and Region.
+Your task is to read the CSV file, perform basic data analysis, and print the results.
+Steps:
+
+Load the CSV file into a pandas DataFrame.
+Print the first five rows of the DataFrame.
+Calculate and print the total sales for each product.
+Find and print the region with the highest total sales.
+Print the sales data for the last 7 days.
+
+
+Case-2: SQL
+Task: Basic SQL Queries on a Sales Database
+
+Description:
+
+You have a table named sales with columns: id, date, product, sales_amount, and region.
+Write SQL queries to extract specific information from the table.
+Steps:
+
+Write a query to select all rows from the sales table.
+Write a query to calculate the total sales amount for each product.
+Write a query to find the region with the highest total sales amount.
+Write a query to retrieve sales data for the last 7 days.
