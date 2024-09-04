@@ -1,140 +1,46 @@
-import re
+from abc import ABC, abstractmethod
+from typing import List, Dict
 
-class Field:
-    def __init__(self, name, alias, value):
-        self.name = name
-        self.alias = alias
-        self.id = None
-        self.value = value.strip() if value else None
+class BaseRule(ABC):
+    def __init__(self, rule_id, category_code, set_id, or_and_flag, value_date_flag, amount_flag):
+        self.rule_id = rule_id
+        self.category_code = category_code
+        self.set_id = set_id
+        self.or_and_flag = or_and_flag
+        self.value_date_flag = value_date_flag
+        self.amount_flag = amount_flag
+        self.filter1 = None  # Placeholder for the first leg/filter values
+        self.filter2 = None  # Placeholder for the second leg/filter values
+        self.parsing_info = {"filter1": {}, "filter2": {}}  # Dictionary to store parsed rule cases
 
-        # Initialize flags and parameters
-        self.exp_flag = False
-        self.valdt_flag = False
-        self.op_flag = False
-        self.perf_ref_flag = False
+    def add_filter1(self, ls_flag, dc_flag, fields: List['Field']):
+        self.filter1 = {
+            'ls_flag': ls_flag,
+            'dc_flag': dc_flag,
+            'fields': fields
+        }
+        self._update_parsing_info('filter1', fields)
 
-        self.valdt_params = {}
-        self.op_params = {}
-        self.perf_ref_params = {}
+    def add_filter2(self, ls_flag, dc_flag, fields: List['Field']):
+        self.filter2 = {
+            'ls_flag': ls_flag,
+            'dc_flag': dc_flag,
+            'fields': fields
+        }
+        self._update_parsing_info('filter2', fields)
 
-        # Extract the ID if present in the value
-        self._extract_id()
+    def _update_parsing_info(self, filter_key, fields: List['Field']):
+        """Update parsing information dictionary based on the field's flags."""
+        for field in fields:
+            if field.perf_ref_flag:
+                self.parsing_info[filter_key].setdefault('PerfectReference', []).append(field.name)
+            if field.valdt_flag:
+                self.parsing_info[filter_key].setdefault('ValueDate', []).append(field.name)
+            if field.op_flag:
+                self.parsing_info[filter_key].setdefault('Operation', []).append(field.name)
+            # Add more cases as needed based on the flags
 
-        # If a value is provided, process it
-        if self.value:
-            self.split_values = self._parse_value()
-            self.search_agg_exp = self._create_search_agg_exp()
-        else:
-            self.split_values = None
-            self.search_agg_exp = None
-
-    def _extract_id(self):
-        # Assuming the ID is provided in the format |ID|<id_value>| at the start of the value string
-        id_match = re.match(r'\|ID\|(\d+)\|', self.value)
-        if id_match:
-            self.id = int(id_match.group(1))
-            # Remove the ID from the value string for further processing
-            self.value = self.value[id_match.end():].strip()
-
-    def _parse_value(self):
-        split_values = []
-        parts = re.split(r'(\|EXACT\||\|EXP\||\|FRMT\||\|OP\|)', self.value)[1:]
-
-        for i in range(0, len(parts), 2):
-            identifier = parts[i]
-            content = parts[i + 1]
-
-            # Determine which strategy to use based on the identifier
-            strategy = self._get_strategy(identifier)
-            parsed_value = strategy.parse(content)
-
-            if identifier == '|EXACT|':
-                split_values.append(parsed_value)
-            elif identifier == '|EXP|':
-                self.exp_flag = True
-                split_values.append(parsed_value)
-            elif identifier == '|FRMT|':
-                self.valdt_flag = True
-                self.valdt_params.update(parsed_value)
-            elif identifier == '|OP|':
-                self.op_flag = True
-                self.op_params.update(parsed_value)
-            elif 'PerfRef' in content:
-                self.perf_ref_flag = True
-                self.perf_ref_params.update(parsed_value)
-
-        return split_values
-
-    def _get_strategy(self, identifier: str):
-        if identifier == '|EXACT|':
-            return ExactStrategy()
-        elif identifier == '|EXP|':
-            return ExpStrategy()
-        elif identifier == '|FRMT|':
-            return FRMTStrategy()
-        elif identifier == '|OP|':
-            return OpStrategy()
-        else:  # For PerfRef case
-            return PerfRefStrategy()
-
-    def _create_search_agg_exp(self):
-        # If PerfRef is present, skip creating the search pattern
-        if self.perf_ref_flag:
-            return ""
-
-        parts = []
-        for value in self.split_values:
-            if 'exact' in value:
-                parts.append(re.escape(value['exact']))
-            if 'exp' in value:
-                parts.append(value['exp'])
-
-        return ''.join(parts)
-
-
-# Strategy classes as before
-class ExpressionStrategy(ABC):
     @abstractmethod
-    def parse(self, content: str):
+    def valid_rule_values(self):
+        """Abstract method for validating if corresponding rule cases are present."""
         pass
-
-class ExactStrategy(ExpressionStrategy):
-    def parse(self, content: str):
-        return {'exact': content}
-
-class ExpStrategy(ExpressionStrategy):
-    def parse(self, content: str):
-        return {'exp': content}
-
-class FRMTStrategy(ExpressionStrategy):
-    def parse(self, content: str):
-        return {'date_format': date_format_mapping.get(content.strip(), content.strip())}
-
-class OpStrategy(ExpressionStrategy):
-    def parse(self, content: str):
-        return {'op_details': content.strip()}
-
-class PerfRefStrategy(ExpressionStrategy):
-    def parse(self, content: str):
-        perf_ref_match = re.search(r'\|(\d+)\|PerfRef\|RL\|(\d+)-(\d+)', content)
-        if perf_ref_match:
-            return {
-                'id': int(perf_ref_match.group(1)),
-                'min_length': int(perf_ref_match.group(2)),
-                'max_length': int(perf_ref_match.group(3))
-            }
-        return {}
-
-# Example usage
-date_format_mapping = {
-    "DD-MM-YYYY": "%d-%m-%Y",
-    "MM-DD-YYYY": "%m-%d-%Y",
-    # Add other date formats as needed
-}
-
-# Example where ID is provided in the value string
-field = Field('ref1', 'Reference 1', '|ID|123| |EXACT|SomeExactValue|EXP|SomeExpression|FRMT|DD-MM-YYYY|1|PerfRef|RL|5-15')
-print(field.id)  # Should print 123
-print(field.split_values)  # List of parsed values
-print(field.search_agg_exp)  # Aggregated search expression (if not PerfRef)
-print(field.perf_ref_params)  # Params for PerfRef if applicable
