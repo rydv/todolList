@@ -67,10 +67,10 @@ class PerfRefRule(BaseRule):
         substrings = sorted([ref1[m.a:m.a+m.size] for m in match if m.size >= 5], key=len, reverse=True)
         return substrings[:5]  # Return top 5 longest substrings
 
-    def validate_and_mark(self, txn_group: List[Dict], min_len=5, max_len=15) -> bool:
+    def validate_and_mark(self, txn_group: List[Dict], min_len=5, max_len=15) -> Tuple[bool, List[str]]:
         """Validate and mark relationship groups based on common substrings."""
         if len(txn_group) != 2:
-            return False  # Only consider groups with exactly two transactions
+            return False, []  # Only consider groups with exactly two transactions
 
         # Extract the REFERENCE field from both transactions
         ref1 = txn_group[0].get('REFERENCE', '')
@@ -78,17 +78,16 @@ class PerfRefRule(BaseRule):
 
         # Ensure both references are provided and non-empty
         if not ref1 or not ref3:
-            return False
+            return False, []
 
         # Find common substrings between the two references
         common_substrings = self.find_top_5_common_substrings(ref1, ref3)
 
-        # Check if any of the common substrings meet the length criteria
-        for substring in common_substrings:
-            if min_len <= len(substring) <= max_len:
-                return True  # Mark as matched
+        # Filter substrings based on the length criteria
+        valid_substrings = [substring for substring in common_substrings if min_len <= len(substring) <= max_len]
 
-        return False
+        # Return True if any valid substrings exist, along with the list of valid substrings
+        return bool(valid_substrings), valid_substrings
 
     def find_matches(self) -> List[Dict]:
         """Find matched relationship groups based on the PerfRef rule."""
@@ -111,10 +110,12 @@ class PerfRefRule(BaseRule):
 
             # Process each group
             for relationship_id, txn_group in grouped_transactions.items():
-                if self.validate_and_mark(txn_group):
+                is_matched, matched_substrings = self.validate_and_mark(txn_group)
+                if is_matched:
                     matched_groups.append({
                         'RELATIONSHIP_ID': relationship_id,
-                        'TRANSACTIONS': txn_group
-                    })  # Store matched groups
+                        'TRANSACTIONS': txn_group,
+                        'MATCHED_SUBSTRINGS': matched_substrings
+                    })  # Store matched groups along with substrings
 
         return matched_groups
