@@ -89,13 +89,13 @@ class PerfRefRule(BaseRule):
         # Return True if any valid substrings exist, along with the list of valid substrings
         return bool(valid_substrings), valid_substrings
 
-    def find_matches(self) -> List[Dict]:
-        """Find matched relationship groups based on the PerfRef rule."""
+    def find_matches(self) -> pd.DataFrame:
+        """Find matched relationship groups based on the PerfRef rule and return a DataFrame."""
         # Validate the rule
         if not self.valid_rule_values():
             raise ValueError("Invalid rule values for PerfRef processing.")
 
-        matched_groups = []
+        matched_transactions = []  # Initialize list to store matched transactions
         scroll_id = None
 
         while True:
@@ -112,10 +112,25 @@ class PerfRefRule(BaseRule):
             for relationship_id, txn_group in grouped_transactions.items():
                 is_matched, matched_substrings = self.validate_and_mark(txn_group)
                 if is_matched:
-                    matched_groups.append({
-                        'RELATIONSHIP_ID': relationship_id,
-                        'TRANSACTIONS': txn_group,
-                        'MATCHED_SUBSTRINGS': matched_substrings
-                    })  # Store matched groups along with substrings
+                    # Create DataFrame from the transaction group
+                    txn_group_df = pd.DataFrame(txn_group)
 
-        return matched_groups
+                    # Add matched_value field to the DataFrame
+                    txn_group_df['MATCHED_VALUE'] = ', '.join(matched_substrings)  # Join substrings into one string
+
+                    # Append to matched_transactions list
+                    matched_transactions.append(txn_group_df)
+
+        # Concatenate all DataFrames in the list into a single DataFrame
+        if matched_transactions:
+            final_df = pd.concat(matched_transactions, ignore_index=True)
+
+            # Reset index
+            final_df.reset_index(drop=True, inplace=True)
+
+            # Add Rule Id column
+            final_df['Rule Id'] = self.rule_id
+
+            return final_df
+
+        return pd.DataFrame()  # Return an empty DataFrame if no matches found
