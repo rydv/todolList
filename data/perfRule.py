@@ -125,6 +125,12 @@ class PerfRefRule(BaseRule):
         if matched_transactions:
             final_df = pd.concat(matched_transactions, ignore_index=True)
 
+            # Apply amount flag filter if self.amount_flag is set
+            if self.amount_flag:
+                final_df = final_df.groupby('RELATIONSHIP_ID').filter(
+                    lambda group: self.check_amount_flag_condition('AMOUNT', self.amount_flag, group)
+                )
+
             # Reset index
             final_df.reset_index(drop=True, inplace=True)
 
