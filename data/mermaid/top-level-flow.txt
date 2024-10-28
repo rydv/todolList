@@ -1,0 +1,33 @@
+graph TB
+subgraph Frontend
+A[React Application] --> |User Actions|A1[Configure Reports]
+A --> |View/Monitor|A2[Reports Dashboard]
+A --> |Track Status|A3[Run Statistics]
+A1 --> |API Calls|B
+A2 --> |API Calls|B
+A3 --> |API Calls|B
+end
+
+subgraph Backend Controllers
+B[API Controllers] --> |CRUD Operations|D
+B --> |Status Updates|D
+end
+
+subgraph Scheduler
+C[Scheduler Service] --> |Reads Enabled Reports|D
+C --> |Updates Status|D
+C --> |Triggers|E
+end
+
+subgraph Core Processing Engine
+E[Process.py] --> E1[Rule Builder]
+E1 --> E2[Rule Processing]
+E2 --> E3[Strategy Implementation]
+E3 --> |Writes Results|D
+end
+
+subgraph Database
+D[Elasticsearch] --> D1[configured_reports_index]
+D --> D2[reports_run_index]
+D --> D3[matched_data_index]
+end

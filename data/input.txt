@@ -1,0 +1,6 @@
+|ID|123|EXACT|<exact value>|EXP|<expression>
+|ID|123|EXACT|<exact value>|EXP|<expression>|DT_FRMT|<defines value date pattern 'DD-MM-YYYY' etc>
+|ID|123|EXACT|<exact value>|EXP|<expression>|OP|REP|:||<performance replace operation, replaces ':' with ''>
+|ID|123|PerfRef|RL|5-15
+
+|EXC|<ignore case if value is present>

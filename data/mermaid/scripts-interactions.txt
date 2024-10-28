@@ -1,0 +1,32 @@
+graph TD
+A["App.tsx"] --> B["ReportsPage.tsx"]
+A --> C["ConfigureReport.tsx"]
+
+B --> D["ReportsSummaryCard.tsx"]
+B --> E["FilterForm.tsx"]
+B --> F["ConfiguredReportsTable.tsx"]
+F --> G["FileDetailsPopup.tsx"]
+
+C --> H["FeaturesForm.tsx"]
+C --> I["UploadCard.tsx"]
+
+J["process.py"] --> K["rulebuilder.py"]
+K --> L["rule.py"]
+L --> M["field.py"]
+L --> N["ruleparams.py"]
+
+L --> O["Strategy Modules"]
+O --> P["basestrategy.py"]
+P --> Q["expressionstrategy.py"]
+P --> R["valuedatestrategy.py"]
+P --> S["perfrefstrategy.py"]
+P --> T["operationstrategy.py"]
+P --> U["fieldvaluestrategy.py"]
+
+V["Elasticsearch"] --> W["configured_reports_index"]
+V --> X["reports_run_index"]
+V --> Y["matched_data_index"]
+
+C -.-> V
+F -.-> V
+J -.-> V
